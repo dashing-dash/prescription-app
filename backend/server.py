@@ -76,6 +76,7 @@ class Prescription(BaseModel):
     patient_name: str
     patient_age: Optional[int] = None
     date: str
+    diagnosis: Optional[str] = None
     medicines: List[PrescriptionMedicine]
     doctor_notes: Optional[str] = None
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
@@ -84,6 +85,7 @@ class PrescriptionCreate(BaseModel):
     patient_name: str
     patient_age: Optional[int] = None
     date: str
+    diagnosis: Optional[str] = None
     medicines: List[PrescriptionMedicine]
     doctor_notes: Optional[str] = None
 
