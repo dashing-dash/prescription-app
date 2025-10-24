@@ -35,6 +35,39 @@ const CreatePrescription = () => {
     }
   }, [medicineSearch, activeSearchIndex]);
 
+  const searchPatients = async (query) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/patients/search?q=${query}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setPatientSuggestions(response.data);
+    } catch (error) {
+      console.error("Failed to search patients", error);
+    }
+  };
+
+  const handlePatientNameChange = (value) => {
+    setFormData({ ...formData, patient_name: value });
+    if (value) {
+      searchPatients(value);
+      setShowPatientSuggestions(true);
+    } else {
+      setPatientSuggestions([]);
+      setShowPatientSuggestions(false);
+    }
+  };
+
+  const selectPatient = (patient) => {
+    setFormData({
+      ...formData,
+      patient_name: patient.name,
+      patient_age: patient.age ? patient.age.toString() : ""
+    });
+    setPatientSuggestions([]);
+    setShowPatientSuggestions(false);
+  };
+
   const searchMedicines = async (query) => {
     try {
       const token = localStorage.getItem('token');
