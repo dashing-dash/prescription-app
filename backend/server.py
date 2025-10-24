@@ -61,7 +61,9 @@ class Medicine(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
-    common_dosages: List[str] = []
+    dosage: str
+    frequency: str
+    unique_key: str
 
 class PrescriptionMedicine(BaseModel):
     name: str
@@ -108,7 +110,11 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid authentication credentials")
 
-# Initialize database with doctor and medicines
+def create_medicine_key(name: str, dosage: str, frequency: str) -> str:
+    """Create unique key for medicine combination"""
+    return f"{name.lower().strip()}_{dosage.lower().strip()}_{frequency.lower().strip()}"
+
+# Initialize database with doctor
 async def init_db():
     # Create doctor if not exists
     doctor = await db.users.find_one({"username": "doctor"})
@@ -122,32 +128,8 @@ async def init_db():
         }
         await db.users.insert_one(doctor_data)
     
-    # Add medicines if collection is empty
-    count = await db.medicines.count_documents({})
-    if count == 0:
-        medicines = [
-            {"id": str(uuid.uuid4()), "name": "Paracetamol", "common_dosages": ["500mg", "650mg", "1000mg"]},
-            {"id": str(uuid.uuid4()), "name": "Ibuprofen", "common_dosages": ["200mg", "400mg", "600mg"]},
-            {"id": str(uuid.uuid4()), "name": "Amoxicillin", "common_dosages": ["250mg", "500mg"]},
-            {"id": str(uuid.uuid4()), "name": "Azithromycin", "common_dosages": ["250mg", "500mg"]},
-            {"id": str(uuid.uuid4()), "name": "Ciprofloxacin", "common_dosages": ["250mg", "500mg", "750mg"]},
-            {"id": str(uuid.uuid4()), "name": "Omeprazole", "common_dosages": ["20mg", "40mg"]},
-            {"id": str(uuid.uuid4()), "name": "Metformin", "common_dosages": ["500mg", "850mg", "1000mg"]},
-            {"id": str(uuid.uuid4()), "name": "Atorvastatin", "common_dosages": ["10mg", "20mg", "40mg"]},
-            {"id": str(uuid.uuid4()), "name": "Losartan", "common_dosages": ["25mg", "50mg", "100mg"]},
-            {"id": str(uuid.uuid4()), "name": "Amlodipine", "common_dosages": ["2.5mg", "5mg", "10mg"]},
-            {"id": str(uuid.uuid4()), "name": "Levothyroxine", "common_dosages": ["25mcg", "50mcg", "100mcg"]},
-            {"id": str(uuid.uuid4()), "name": "Cetirizine", "common_dosages": ["5mg", "10mg"]},
-            {"id": str(uuid.uuid4()), "name": "Montelukast", "common_dosages": ["5mg", "10mg"]},
-            {"id": str(uuid.uuid4()), "name": "Pantoprazole", "common_dosages": ["20mg", "40mg"]},
-            {"id": str(uuid.uuid4()), "name": "Clopidogrel", "common_dosages": ["75mg"]},
-            {"id": str(uuid.uuid4()), "name": "Aspirin", "common_dosages": ["75mg", "150mg", "325mg"]},
-            {"id": str(uuid.uuid4()), "name": "Diclofenac", "common_dosages": ["50mg", "75mg"]},
-            {"id": str(uuid.uuid4()), "name": "Ranitidine", "common_dosages": ["150mg", "300mg"]},
-            {"id": str(uuid.uuid4()), "name": "Prednisolone", "common_dosages": ["5mg", "10mg", "20mg"]},
-            {"id": str(uuid.uuid4()), "name": "Vitamin D3", "common_dosages": ["1000 IU", "2000 IU", "60000 IU"]},
-        ]
-        await db.medicines.insert_many(medicines)
+    # Clear pre-seeded medicines
+    await db.medicines.delete_many({})
 
 @app.on_event("startup")
 async def startup_event():
@@ -166,19 +148,62 @@ async def login(request: LoginRequest):
 @api_router.get("/medicines/search")
 async def search_medicines(q: str = "", _: str = Depends(get_current_user)):
     if not q:
-        medicines = await db.medicines.find({}, {"_id": 0}).limit(20).to_list(20)
+        medicines = await db.medicines.find({}, {"_id": 0}).limit(50).to_list(50)
     else:
+        # Search across name, dosage, and frequency
         medicines = await db.medicines.find(
-            {"name": {"$regex": q, "$options": "i"}},
+            {
+                "$or": [
+                    {"name": {"$regex": q, "$options": "i"}},
+                    {"dosage": {"$regex": q, "$options": "i"}},
+                    {"frequency": {"$regex": q, "$options": "i"}}
+                ]
+            },
             {"_id": 0}
-        ).limit(20).to_list(20)
+        ).limit(50).to_list(50)
     return medicines
+
+@api_router.post("/medicines/save")
+async def save_medicine(medicine: PrescriptionMedicine, _: str = Depends(get_current_user)):
+    """Save a new medicine combination if it doesn't exist"""
+    unique_key = create_medicine_key(medicine.name, medicine.dosage, medicine.frequency)
+    
+    # Check if this combination already exists
+    existing = await db.medicines.find_one({"unique_key": unique_key})
+    if existing:
+        return {"message": "Medicine combination already exists", "id": existing["id"]}
+    
+    # Save new medicine combination
+    medicine_doc = {
+        "id": str(uuid.uuid4()),
+        "name": medicine.name,
+        "dosage": medicine.dosage,
+        "frequency": medicine.frequency,
+        "unique_key": unique_key
+    }
+    await db.medicines.insert_one(medicine_doc)
+    return {"message": "Medicine combination saved", "id": medicine_doc["id"]}
 
 @api_router.post("/prescriptions", response_model=Prescription)
 async def create_prescription(prescription: PrescriptionCreate, _: str = Depends(get_current_user)):
     prescription_obj = Prescription(**prescription.model_dump())
     doc = prescription_obj.model_dump()
     await db.prescriptions.insert_one(doc)
+    
+    # Auto-save all medicine combinations
+    for med in prescription.medicines:
+        unique_key = create_medicine_key(med.name, med.dosage, med.frequency)
+        existing = await db.medicines.find_one({"unique_key": unique_key})
+        if not existing:
+            medicine_doc = {
+                "id": str(uuid.uuid4()),
+                "name": med.name,
+                "dosage": med.dosage,
+                "frequency": med.frequency,
+                "unique_key": unique_key
+            }
+            await db.medicines.insert_one(medicine_doc)
+    
     return prescription_obj
 
 @api_router.get("/prescriptions", response_model=List[Prescription])

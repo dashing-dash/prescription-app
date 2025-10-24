@@ -50,15 +50,20 @@ const CreatePrescription = () => {
     updatedMedicines[index][field] = value;
     setMedicines(updatedMedicines);
 
-    if (field === 'name') {
+    // Trigger search when any field changes
+    if (field === 'name' || field === 'dosage' || field === 'frequency') {
       setActiveSearchIndex(index);
-      setMedicineSearch(value);
+      // Combine all fields for comprehensive search
+      const searchTerm = `${updatedMedicines[index].name} ${updatedMedicines[index].dosage} ${updatedMedicines[index].frequency}`.trim();
+      setMedicineSearch(searchTerm);
     }
   };
 
   const selectMedicine = (index, medicine) => {
     const updatedMedicines = [...medicines];
     updatedMedicines[index].name = medicine.name;
+    updatedMedicines[index].dosage = medicine.dosage;
+    updatedMedicines[index].frequency = medicine.frequency;
     setMedicines(updatedMedicines);
     setMedicineSuggestions([]);
     setActiveSearchIndex(null);
@@ -104,6 +109,22 @@ const CreatePrescription = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleInputFocus = (index) => {
+    setActiveSearchIndex(index);
+    const searchTerm = `${medicines[index].name} ${medicines[index].dosage} ${medicines[index].frequency}`.trim();
+    if (searchTerm) {
+      setMedicineSearch(searchTerm);
+    }
+  };
+
+  const handleInputBlur = () => {
+    // Delay to allow click on suggestion
+    setTimeout(() => {
+      setActiveSearchIndex(null);
+      setMedicineSuggestions([]);
+    }, 200);
   };
 
   return (
@@ -200,7 +221,7 @@ const CreatePrescription = () => {
               </div>
 
               {medicines.map((medicine, index) => (
-                <div key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-200 space-y-3">
+                <div key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-200 space-y-3 relative">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-700">Medicine {index + 1}</span>
                     {medicines.length > 1 && (
@@ -217,65 +238,73 @@ const CreatePrescription = () => {
                     )}
                   </div>
 
-                  <div className="relative">
-                    <Label className="text-gray-700 font-medium">Medicine Name *</Label>
-                    <Input
-                      type="text"
-                      value={medicine.name}
-                      onChange={(e) => handleMedicineInputChange(index, 'name', e.target.value)}
-                      placeholder="Search medicine..."
-                      className="mt-1.5 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                      required
-                      data-testid={`medicine-name-input-${index}`}
-                    />
-                    {activeSearchIndex === index && medicineSuggestions.length > 0 && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto" data-testid="medicine-suggestions">
-                        {medicineSuggestions.map((med) => (
-                          <div
-                            key={med.id}
-                            onClick={() => selectMedicine(index, med)}
-                            className="px-4 py-2 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                            data-testid={`medicine-suggestion-${med.id}`}
-                          >
-                            <div className="font-medium text-gray-900">{med.name}</div>
-                            {med.common_dosages.length > 0 && (
-                              <div className="text-xs text-gray-600 mt-1">
-                                Common: {med.common_dosages.join(', ')}
-                              </div>
-                            )}
-                          </div>
-                        ))}
+                  <div className="grid grid-cols-1 gap-3">
+                    <div>
+                      <Label className="text-gray-700 font-medium">Medicine Name *</Label>
+                      <Input
+                        type="text"
+                        value={medicine.name}
+                        onChange={(e) => handleMedicineInputChange(index, 'name', e.target.value)}
+                        onFocus={() => handleInputFocus(index)}
+                        onBlur={handleInputBlur}
+                        placeholder="e.g., Paracetamol"
+                        className="mt-1.5 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                        required
+                        data-testid={`medicine-name-input-${index}`}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-gray-700 font-medium">Dosage *</Label>
+                        <Input
+                          type="text"
+                          value={medicine.dosage}
+                          onChange={(e) => handleMedicineInputChange(index, 'dosage', e.target.value)}
+                          onFocus={() => handleInputFocus(index)}
+                          onBlur={handleInputBlur}
+                          placeholder="e.g., 500mg"
+                          className="mt-1.5 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                          required
+                          data-testid={`medicine-dosage-input-${index}`}
+                        />
                       </div>
-                    )}
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label className="text-gray-700 font-medium">Dosage *</Label>
-                      <Input
-                        type="text"
-                        value={medicine.dosage}
-                        onChange={(e) => handleMedicineInputChange(index, 'dosage', e.target.value)}
-                        placeholder="e.g., 500mg"
-                        className="mt-1.5 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                        required
-                        data-testid={`medicine-dosage-input-${index}`}
-                      />
-                    </div>
-
-                    <div>
-                      <Label className="text-gray-700 font-medium">Frequency *</Label>
-                      <Input
-                        type="text"
-                        value={medicine.frequency}
-                        onChange={(e) => handleMedicineInputChange(index, 'frequency', e.target.value)}
-                        placeholder="e.g., Twice daily"
-                        className="mt-1.5 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                        required
-                        data-testid={`medicine-frequency-input-${index}`}
-                      />
+                      <div>
+                        <Label className="text-gray-700 font-medium">Frequency *</Label>
+                        <Input
+                          type="text"
+                          value={medicine.frequency}
+                          onChange={(e) => handleMedicineInputChange(index, 'frequency', e.target.value)}
+                          onFocus={() => handleInputFocus(index)}
+                          onBlur={handleInputBlur}
+                          placeholder="e.g., Twice daily"
+                          className="mt-1.5 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                          required
+                          data-testid={`medicine-frequency-input-${index}`}
+                        />
+                      </div>
                     </div>
                   </div>
+
+                  {/* Autocomplete dropdown */}
+                  {activeSearchIndex === index && medicineSuggestions.length > 0 && (
+                    <div className="absolute z-20 w-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto" data-testid="medicine-suggestions">
+                      {medicineSuggestions.map((med) => (
+                        <div
+                          key={med.id}
+                          onClick={() => selectMedicine(index, med)}
+                          className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                          data-testid={`medicine-suggestion-${med.id}`}
+                        >
+                          <div className="font-medium text-gray-900">{med.name}</div>
+                          <div className="text-sm text-gray-600 mt-1">
+                            <span className="font-medium">Dosage:</span> {med.dosage} | <span className="font-medium">Frequency:</span> {med.frequency}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
