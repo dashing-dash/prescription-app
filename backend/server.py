@@ -322,6 +322,8 @@ async def download_prescription_pdf(prescription_id: str, _: str = Depends(get_c
     ]
     if prescription.get('patient_age'):
         patient_data.insert(1, ['Age:', str(prescription['patient_age'])])
+    if prescription.get('diagnosis'):
+        patient_data.append(['Diagnosis:', prescription['diagnosis']])
     
     patient_table = Table(patient_data, colWidths=[2*inch, 4*inch])
     patient_table.setStyle(TableStyle([
