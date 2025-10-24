@@ -248,6 +248,25 @@ async def get_prescription(prescription_id: str, _: str = Depends(get_current_us
         raise HTTPException(status_code=404, detail="Prescription not found")
     return prescription
 
+@api_router.delete("/prescriptions/{prescription_id}")
+async def delete_prescription(prescription_id: str, _: str = Depends(get_current_user)):
+    result = await db.prescriptions.delete_one({"id": prescription_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Prescription not found")
+    return {"message": "Prescription deleted successfully"}
+
+@api_router.get("/medicines", response_model=List[Medicine])
+async def get_all_medicines(_: str = Depends(get_current_user)):
+    medicines = await db.medicines.find({}, {"_id": 0}).sort("name", 1).to_list(1000)
+    return medicines
+
+@api_router.delete("/medicines/{medicine_id}")
+async def delete_medicine(medicine_id: str, _: str = Depends(get_current_user)):
+    result = await db.medicines.delete_one({"id": medicine_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Medicine not found")
+    return {"message": "Medicine deleted successfully"}
+
 @api_router.get("/prescriptions/{prescription_id}/pdf")
 async def download_prescription_pdf(prescription_id: str, _: str = Depends(get_current_user)):
     prescription = await db.prescriptions.find_one({"id": prescription_id}, {"_id": 0})
