@@ -263,6 +263,19 @@ const CreatePrescription = () => {
                   data-testid="prescription-date-input"
                 />
               </div>
+
+              <div>
+                <Label htmlFor="diagnosis" className="text-gray-700 font-medium">Diagnosis</Label>
+                <Input
+                  id="diagnosis"
+                  type="text"
+                  value={formData.diagnosis}
+                  onChange={(e) => setFormData({ ...formData, diagnosis: e.target.value })}
+                  placeholder="e.g., Upper Respiratory Tract Infection"
+                  className="mt-1.5 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  data-testid="diagnosis-input"
+                />
+              </div>
             </div>
 
             {/* Medicines */}
