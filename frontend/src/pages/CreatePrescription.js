@@ -195,18 +195,45 @@ const CreatePrescription = () => {
               <h2 className="text-xl font-semibold text-gray-900 border-b pb-2">Patient Information</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+                <div className="relative">
                   <Label htmlFor="patient_name" className="text-gray-700 font-medium">Patient Name *</Label>
                   <Input
                     id="patient_name"
                     type="text"
                     value={formData.patient_name}
-                    onChange={(e) => setFormData({ ...formData, patient_name: e.target.value })}
+                    onChange={(e) => handlePatientNameChange(e.target.value)}
+                    onFocus={() => {
+                      if (formData.patient_name) {
+                        searchPatients(formData.patient_name);
+                        setShowPatientSuggestions(true);
+                      }
+                    }}
+                    onBlur={() => {
+                      setTimeout(() => setShowPatientSuggestions(false), 200);
+                    }}
                     placeholder="Enter patient name"
                     className="mt-1.5 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                     required
                     data-testid="patient-name-input"
                   />
+                  {/* Patient autocomplete dropdown */}
+                  {showPatientSuggestions && patientSuggestions.length > 0 && (
+                    <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto" data-testid="patient-suggestions">
+                      {patientSuggestions.map((patient) => (
+                        <div
+                          key={patient.id}
+                          onClick={() => selectPatient(patient)}
+                          className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                          data-testid={`patient-suggestion-${patient.id}`}
+                        >
+                          <div className="font-medium text-gray-900">{patient.name}</div>
+                          {patient.age && (
+                            <div className="text-sm text-gray-600 mt-1">Age: {patient.age} years</div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div>
