@@ -123,6 +123,12 @@ const ViewPrescription = () => {
                 <p className="text-sm text-gray-600 mb-1">Date</p>
                 <p className="text-base font-semibold text-gray-900" data-testid="view-prescription-date">{prescription.date}</p>
               </div>
+              {prescription.diagnosis && (
+                <div className="col-span-2">
+                  <p className="text-sm text-gray-600 mb-1">Diagnosis</p>
+                  <p className="text-base font-semibold text-gray-900" data-testid="view-diagnosis">{prescription.diagnosis}</p>
+                </div>
+              )}
             </div>
           </div>
 
