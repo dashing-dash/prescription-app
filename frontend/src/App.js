@@ -5,6 +5,7 @@ import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import CreatePrescription from "@/pages/CreatePrescription";
 import ViewPrescription from "@/pages/ViewPrescription";
+import MedicinesManager from "@/pages/MedicinesManager";
 import { Toaster } from "@/components/ui/sonner";
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
           <Route path="/" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />
           <Route path="/create" element={isAuthenticated ? <CreatePrescription /> : <Navigate to="/login" />} />
           <Route path="/prescription/:id" element={isAuthenticated ? <ViewPrescription /> : <Navigate to="/login" />} />
+          <Route path="/medicines" element={isAuthenticated ? <MedicinesManager /> : <Navigate to="/login" />} />
         </Routes>
       </BrowserRouter>
       <Toaster position="top-right" />
