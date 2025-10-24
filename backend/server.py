@@ -202,6 +202,18 @@ async def create_prescription(prescription: PrescriptionCreate, _: str = Depends
     doc = prescription_obj.model_dump()
     await db.prescriptions.insert_one(doc)
     
+    # Auto-save patient (name + age combination)
+    patient_key = f"{prescription.patient_name.lower().strip()}_{prescription.patient_age if prescription.patient_age else 'unknown'}"
+    existing_patient = await db.patients.find_one({"unique_key": patient_key})
+    if not existing_patient:
+        patient_doc = {
+            "id": str(uuid.uuid4()),
+            "name": prescription.patient_name,
+            "age": prescription.patient_age,
+            "unique_key": patient_key
+        }
+        await db.patients.insert_one(patient_doc)
+    
     # Auto-save all medicine combinations
     for med in prescription.medicines:
         unique_key = create_medicine_key(med.name, med.dosage, med.frequency)
