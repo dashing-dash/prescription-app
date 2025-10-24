@@ -17,6 +17,7 @@ const CreatePrescription = () => {
     patient_name: "",
     patient_age: "",
     date: format(new Date(), 'yyyy-MM-dd'),
+    diagnosis: "",
     doctor_notes: ""
   });
   const [medicines, setMedicines] = useState([{ name: "", dosage: "", frequency: "" }]);
