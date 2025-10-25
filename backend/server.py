@@ -308,7 +308,8 @@ async def download_prescription_pdf(prescription_id: str, inline: bool = True, t
         fontSize=12,
         textColor=colors.HexColor('#1e40af'),
         alignment=TA_LEFT,
-        spaceAfter=3
+        spaceAfter=3,
+        fontName=hindi_font
     )
     
     header_style_right = ParagraphStyle(
@@ -317,7 +318,8 @@ async def download_prescription_pdf(prescription_id: str, inline: bool = True, t
         fontSize=12,
         textColor=colors.HexColor('#1e40af'),
         alignment=TA_LEFT,
-        spaceAfter=3
+        spaceAfter=3,
+        fontName=hindi_font
     )
     
     center_header_style = ParagraphStyle(
@@ -327,7 +329,7 @@ async def download_prescription_pdf(prescription_id: str, inline: bool = True, t
         textColor=colors.HexColor('#1e40af'),
         alignment=TA_CENTER,
         spaceAfter=12,
-        fontName='Helvetica-Bold'
+        fontName=hindi_font
     )
     
     subheader_style = ParagraphStyle(
@@ -336,7 +338,8 @@ async def download_prescription_pdf(prescription_id: str, inline: bool = True, t
         fontSize=9,
         textColor=colors.HexColor('#64748b'),
         alignment=TA_LEFT,
-        spaceAfter=2
+        spaceAfter=2,
+        fontName=hindi_font
     )
     
     section_header_style = ParagraphStyle(
@@ -353,7 +356,8 @@ async def download_prescription_pdf(prescription_id: str, inline: bool = True, t
         parent=styles['Normal'],
         fontSize=9,
         textColor=colors.HexColor('#64748b'),
-        alignment=TA_CENTER
+        alignment=TA_CENTER,
+        fontName=hindi_font
     )
     
     # Header with two columns
