@@ -291,6 +291,13 @@ async def download_prescription_pdf(prescription_id: str, inline: bool = True, t
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=72, leftMargin=72, topMargin=50, bottomMargin=50)
     
+    # Register Hindi font
+    try:
+        pdfmetrics.registerFont(TTFont('Gargi', '/usr/share/fonts/truetype/Gargi/Gargi.ttf'))
+        hindi_font = 'Gargi'
+    except:
+        hindi_font = 'Helvetica'  # Fallback
+    
     story = []
     styles = getSampleStyleSheet()
     
