@@ -433,10 +433,16 @@ async def download_prescription_pdf(prescription_id: str, inline: bool = True, _
     doc.build(story)
     buffer.seek(0)
     
+    # Return inline for viewing in browser, or attachment for download
+    disposition = "inline" if inline else "attachment"
+    
     return StreamingResponse(
         buffer,
         media_type="application/pdf",
-        headers={"Content-Disposition": f"attachment; filename=prescription_{prescription_id}.pdf"}
+        headers={
+            "Content-Disposition": f'{disposition}; filename="prescription_{prescription_id}.pdf"',
+            "Cache-Control": "no-cache"
+        }
     )
 
 # Include the router in the main app
