@@ -125,7 +125,7 @@ async def init_db():
         doctor_data = {
             "id": str(uuid.uuid4()),
             "username": "doctor",
-            "name": "Dr. Sanjeev Maheshwari",
+            "name": "Dr. Sanjiv Maheshwari",
             "hashed_password": hashed_pwd
         }
         await db.users.insert_one(doctor_data)
