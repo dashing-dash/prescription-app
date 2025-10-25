@@ -337,7 +337,7 @@ async def download_prescription_pdf(prescription_id: str, inline: bool = True, _
     
     # Header with two columns
     header_left = [
-        [Paragraph("डॉ. संजीव माहेश्वरी", header_style)],
+        [Paragraph("डॉ. संजिव माहेश्वरी", header_style)],
         [Paragraph("एम. डी. (मेडीसिन)", subheader_style)],
         [Paragraph("F.I.C.P., F.I.A.C.M., F.F.I.S.C., F.I.M.S.A., F.I.C.A.", subheader_style)],
         [Paragraph("वरिष्ठ आचार्य (मेडीसिन)", subheader_style)]
