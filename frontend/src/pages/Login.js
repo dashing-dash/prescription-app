@@ -87,12 +87,6 @@ const Login = ({ setIsAuthenticated }) => {
           >
             {loading ? "Signing in..." : "Sign In"}
           </Button>
-
-          <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
-            <p className="text-xs text-gray-600 text-center">
-              <span className="font-medium">Demo credentials:</span> username: <span className="font-mono">doctor</span> | password: <span className="font-mono">doctor123</span>
-            </p>
-          </div>
         </form>
       </div>
     </div>
