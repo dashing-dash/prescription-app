@@ -268,7 +268,7 @@ async def delete_medicine(medicine_id: str, _: str = Depends(get_current_user)):
     return {"message": "Medicine deleted successfully"}
 
 @api_router.get("/prescriptions/{prescription_id}/pdf")
-async def download_prescription_pdf(prescription_id: str, _: str = Depends(get_current_user)):
+async def download_prescription_pdf(prescription_id: str, inline: bool = True, _: str = Depends(get_current_user)):
     prescription = await db.prescriptions.find_one({"id": prescription_id}, {"_id": 0})
     if not prescription:
         raise HTTPException(status_code=404, detail="Prescription not found")
