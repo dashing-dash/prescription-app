@@ -165,7 +165,7 @@ const ViewPrescription = () => {
 
           {/* Signature */}
           <div className="mt-12 pt-8 border-t border-gray-200">
-            <p className="text-base font-semibold text-gray-900">Dr. Sanjeev Maheshwari</p>
+            <p className="text-base font-semibold text-gray-900">Dr. Sanjiv Maheshwari</p>
           </div>
         </div>
       </main>
