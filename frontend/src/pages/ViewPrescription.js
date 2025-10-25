@@ -35,14 +35,9 @@ const ViewPrescription = () => {
   const handleDownloadPDF = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${API}/prescriptions/${id}/pdf`, {
-        headers: { Authorization: `Bearer ${token}` },
-        responseType: 'blob'
-      });
-      
-      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
-      window.open(url, '_blank');
-      setTimeout(() => window.URL.revokeObjectURL(url), 100);
+      // Open PDF directly from backend URL
+      const pdfUrl = `${API}/prescriptions/${id}/pdf?inline=true`;
+      window.open(pdfUrl + `&token=${token}`, '_blank');
       toast.success("Prescription opened in new tab");
     } catch (error) {
       toast.error("Failed to open prescription");
