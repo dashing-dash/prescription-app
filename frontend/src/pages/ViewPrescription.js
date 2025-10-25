@@ -97,7 +97,7 @@ const ViewPrescription = () => {
         <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-blue-100 p-12 shadow-2xl" data-testid="prescription-view">
           {/* Doctor Header */}
           <div className="text-center border-b-2 border-blue-200 pb-6 mb-8">
-            <h1 className="text-3xl font-bold text-blue-700 mb-1">Dr. Sanjeev Maheshwari</h1>
+            <h1 className="text-3xl font-bold text-blue-700 mb-1">Dr. Sanjiv Maheshwari</h1>
             <p className="text-gray-600">MBBS, MD (Medicine)</p>
           </div>
 
