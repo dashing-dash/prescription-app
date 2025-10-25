@@ -40,16 +40,12 @@ const ViewPrescription = () => {
         responseType: 'blob'
       });
       
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `prescription_${id}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      toast.success("Prescription downloaded successfully");
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+      window.open(url, '_blank');
+      setTimeout(() => window.URL.revokeObjectURL(url), 100);
+      toast.success("Prescription opened in new tab");
     } catch (error) {
-      toast.error("Failed to download prescription");
+      toast.error("Failed to open prescription");
     }
   };
 
