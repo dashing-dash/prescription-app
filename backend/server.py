@@ -424,7 +424,7 @@ async def download_prescription_pdf(prescription_id: str, inline: bool = True, _
         fontSize=10,
         alignment=TA_LEFT
     )
-    story.append(Paragraph("<b>डॉ. संजीव माहेश्वरी</b>", signature_style))
+    story.append(Paragraph("<b>डॉ. संजिव माहेश्वरी</b>", signature_style))
     story.append(Spacer(1, 0.3*inch))
     
     # Footer
