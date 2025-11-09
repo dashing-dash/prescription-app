@@ -232,6 +232,18 @@ async def create_prescription(prescription: PrescriptionCreate, _: str = Depends
         }
         await db.patients.insert_one(patient_doc)
     
+    # Auto-save investigation if provided
+    if prescription.investigations and prescription.investigations.strip():
+        investigation_key = prescription.investigations.lower().strip()
+        existing_investigation = await db.investigations.find_one({"unique_key": investigation_key})
+        if not existing_investigation:
+            investigation_doc = {
+                "id": str(uuid.uuid4()),
+                "name": prescription.investigations.strip(),
+                "unique_key": investigation_key
+            }
+            await db.investigations.insert_one(investigation_doc)
+    
     # Auto-save all medicine combinations
     for med in prescription.medicines:
         unique_key = create_medicine_key(med.name, med.dosage, med.frequency)
