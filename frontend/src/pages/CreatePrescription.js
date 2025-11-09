@@ -72,6 +72,35 @@ const CreatePrescription = () => {
     setShowPatientSuggestions(false);
   };
 
+  const searchInvestigations = async (query) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/investigations/search?q=${query}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setInvestigationSuggestions(response.data);
+    } catch (error) {
+      console.error("Failed to search investigations", error);
+    }
+  };
+
+  const handleInvestigationChange = (value) => {
+    setFormData({ ...formData, investigations: value });
+    if (value) {
+      searchInvestigations(value);
+      setShowInvestigationSuggestions(true);
+    } else {
+      setInvestigationSuggestions([]);
+      setShowInvestigationSuggestions(false);
+    }
+  };
+
+  const selectInvestigation = (investigation) => {
+    setFormData({ ...formData, investigations: investigation.name });
+    setInvestigationSuggestions([]);
+    setShowInvestigationSuggestions(false);
+  };
+
   const searchMedicines = async (query) => {
     try {
       const token = localStorage.getItem('token');
