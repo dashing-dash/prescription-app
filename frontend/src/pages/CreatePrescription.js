@@ -307,6 +307,43 @@ const CreatePrescription = () => {
                   data-testid="diagnosis-input"
                 />
               </div>
+
+              <div className="relative">
+                <Label htmlFor="investigations" className="text-gray-700 font-medium">Investigations Advised</Label>
+                <Input
+                  id="investigations"
+                  type="text"
+                  value={formData.investigations}
+                  onChange={(e) => handleInvestigationChange(e.target.value)}
+                  onFocus={() => {
+                    if (formData.investigations) {
+                      searchInvestigations(formData.investigations);
+                      setShowInvestigationSuggestions(true);
+                    }
+                  }}
+                  onBlur={() => {
+                    setTimeout(() => setShowInvestigationSuggestions(false), 200);
+                  }}
+                  placeholder="e.g., Complete Blood Count, X-ray Chest"
+                  className="mt-1.5 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  data-testid="investigations-input"
+                />
+                {/* Investigation autocomplete dropdown */}
+                {showInvestigationSuggestions && investigationSuggestions.length > 0 && (
+                  <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto" data-testid="investigation-suggestions">
+                    {investigationSuggestions.map((investigation) => (
+                      <div
+                        key={investigation.id}
+                        onClick={() => selectInvestigation(investigation)}
+                        className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                        data-testid={`investigation-suggestion-${investigation.id}`}
+                      >
+                        <div className="font-medium text-gray-900">{investigation.name}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Medicines */}
