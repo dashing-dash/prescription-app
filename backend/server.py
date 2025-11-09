@@ -475,7 +475,8 @@ async def download_prescription_pdf(prescription_id: str, inline: bool = True, t
         'Signature',
         parent=styles['Normal'],
         fontSize=10,
-        alignment=TA_LEFT
+        alignment=TA_LEFT,
+        fontName=hindi_font
     )
     story.append(Paragraph("<b>डॉ. संजिव माहेश्वरी</b>", signature_style))
     story.append(Spacer(1, 0.3*inch))
