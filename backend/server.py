@@ -181,6 +181,18 @@ async def search_patients(q: str = "", _: str = Depends(get_current_user)):
         ).limit(50).to_list(50)
     return patients
 
+@api_router.get("/investigations/search")
+async def search_investigations(q: str = "", _: str = Depends(get_current_user)):
+    if not q:
+        investigations = await db.investigations.find({}, {"_id": 0}).limit(50).to_list(50)
+    else:
+        # Search by investigation name
+        investigations = await db.investigations.find(
+            {"name": {"$regex": q, "$options": "i"}},
+            {"_id": 0}
+        ).limit(50).to_list(50)
+    return investigations
+
 @api_router.post("/medicines/save")
 async def save_medicine(medicine: PrescriptionMedicine, _: str = Depends(get_current_user)):
     """Save a new medicine combination if it doesn't exist"""
