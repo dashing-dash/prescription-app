@@ -427,6 +427,8 @@ async def download_prescription_pdf(prescription_id: str, inline: bool = True, t
         patient_data.insert(1, ['Age:', str(prescription['patient_age'])])
     if prescription.get('diagnosis'):
         patient_data.append(['Diagnosis:', prescription['diagnosis']])
+    if prescription.get('investigations'):
+        patient_data.append(['Investigations:', prescription['investigations']])
     
     patient_table = Table(patient_data, colWidths=[2*inch, 4*inch])
     patient_table.setStyle(TableStyle([
