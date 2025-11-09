@@ -170,7 +170,6 @@ const CreatePrescription = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      toast.success("Prescription created successfully!");
       navigate(`/prescription/${response.data.id}`);
     } catch (error) {
       toast.error(error.response?.data?.detail || "Failed to create prescription");
