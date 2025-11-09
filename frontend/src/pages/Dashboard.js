@@ -56,10 +56,17 @@ const Dashboard = () => {
     e.stopPropagation();
     try {
       const token = localStorage.getItem('token');
-      // Open PDF directly from backend URL
-      const pdfUrl = `${API}/prescriptions/${prescriptionId}/pdf?inline=true`;
-      window.open(pdfUrl + `&token=${token}`, '_blank');
-      toast.success("Prescription opened in new tab");
+      // Open PDF in new window and trigger print
+      const pdfUrl = `${API}/prescriptions/${prescriptionId}/pdf?inline=true&token=${token}`;
+      const printWindow = window.open(pdfUrl, '_blank');
+      if (printWindow) {
+        printWindow.onload = function() {
+          setTimeout(() => {
+            printWindow.print();
+          }, 500);
+        };
+      }
+      toast.success("Opening print dialog");
     } catch (error) {
       toast.error("Failed to open prescription");
     }
