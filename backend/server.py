@@ -322,11 +322,11 @@ async def download_prescription_pdf(prescription_id: str, inline: bool = True, t
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=72, leftMargin=72, topMargin=50, bottomMargin=50)
     
-    # Register Hindi font from bundled file - Using Lohit for better rendering
+    # Register Hindi font - Using Nakula for proper Unicode Devanagari rendering
     try:
-        font_path = os.path.join(ROOT_DIR, 'fonts', 'Lohit-Devanagari.ttf')
-        pdfmetrics.registerFont(TTFont('LohitDevanagari', font_path))
-        hindi_font = 'LohitDevanagari'
+        font_path = os.path.join(ROOT_DIR, 'fonts', 'nakula.ttf')
+        pdfmetrics.registerFont(TTFont('Nakula', font_path))
+        hindi_font = 'Nakula'
     except Exception as e:
         logger.error(f"Failed to load Hindi font: {e}")
         hindi_font = 'Helvetica'  # Fallback
