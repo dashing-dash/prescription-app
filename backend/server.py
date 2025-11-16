@@ -246,13 +246,18 @@ async def create_prescription(prescription: PrescriptionCreate, _: str = Depends
     
     # Auto-save all medicine combinations
     for med in prescription.medicines:
-        unique_key = create_medicine_key(med.name, med.dosage, med.frequency)
+        # Only create unique key if dosage is provided
+        if med.dosage:
+            unique_key = create_medicine_key(med.name, med.dosage, med.frequency)
+        else:
+            unique_key = f"{med.name.lower().strip()}_{med.frequency.lower().strip()}_nodosage"
+        
         existing = await db.medicines.find_one({"unique_key": unique_key})
         if not existing:
             medicine_doc = {
                 "id": str(uuid.uuid4()),
                 "name": med.name,
-                "dosage": med.dosage,
+                "dosage": med.dosage if med.dosage else "",
                 "frequency": med.frequency,
                 "unique_key": unique_key
             }
