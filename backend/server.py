@@ -69,7 +69,7 @@ class Medicine(BaseModel):
 
 class PrescriptionMedicine(BaseModel):
     name: str
-    dosage: str
+    dosage: Optional[str] = None
     frequency: str
 
 class Prescription(BaseModel):
