@@ -348,21 +348,7 @@ const CreatePrescription = () => {
 
             {/* Medicines */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between border-b pb-2">
-                <h2 className="text-xl font-semibold text-gray-900">Medicines</h2>
-                <Button
-                  type="button"
-                  onClick={addMedicine}
-                  variant="outline"
-                  className="border-blue-200 hover:bg-blue-50 text-blue-600 rounded-lg"
-                  data-testid="add-medicine-button"
-                >
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  Add Medicine
-                </Button>
-              </div>
+              <h2 className="text-xl font-semibold text-gray-900 border-b pb-2">Medicines</h2>
 
               {medicines.map((medicine, index) => (
                 <div key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-200 space-y-3 relative">
