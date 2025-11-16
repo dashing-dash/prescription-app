@@ -386,16 +386,15 @@ const CreatePrescription = () => {
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <Label className="text-gray-700 font-medium">Dosage *</Label>
+                        <Label className="text-gray-700 font-medium">Dosage</Label>
                         <Input
                           type="text"
                           value={medicine.dosage}
                           onChange={(e) => handleMedicineInputChange(index, 'dosage', e.target.value)}
                           onFocus={() => handleInputFocus(index)}
                           onBlur={handleInputBlur}
-                          placeholder="e.g., 500mg"
+                          placeholder="e.g., 500mg (optional)"
                           className="mt-1.5 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                          required
                           data-testid={`medicine-dosage-input-${index}`}
                         />
                       </div>
