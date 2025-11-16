@@ -450,7 +450,11 @@ async def download_prescription_pdf(prescription_id: str, inline: bool = True, t
     
     medicine_data = [['Medicine', 'Dosage', 'Frequency']]
     for med in prescription['medicines']:
-        medicine_data.append([med['name'], med['dosage'], med['frequency']])
+        medicine_data.append([
+            med['name'],
+            med.get('dosage', '-') if med.get('dosage') else '-',
+            med['frequency']
+        ])
     
     medicine_table = Table(medicine_data, colWidths=[2.5*inch, 1.5*inch, 2*inch])
     medicine_table.setStyle(TableStyle([
