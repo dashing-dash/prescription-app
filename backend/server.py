@@ -426,27 +426,24 @@ async def download_prescription_pdf(prescription_id: str, inline: bool = True, t
     # Patient Info
     story.append(Paragraph("<b>Prescription</b>", section_header_style))
     
-    patient_data = [
-        ['Patient Name:', prescription['patient_name']],
-        ['Date:', prescription['date']]
-    ]
+    # Single line for name, age, date
+    patient_info_parts = [f"Patient Name: {prescription['patient_name']}"]
     if prescription.get('patient_age'):
-        patient_data.insert(1, ['Age:', str(prescription['patient_age'])])
-    if prescription.get('diagnosis'):
-        patient_data.append(['Diagnosis:', prescription['diagnosis']])
-    if prescription.get('investigations'):
-        patient_data.append(['Investigations:', prescription['investigations']])
+        patient_info_parts.append(f"Age: {prescription['patient_age']}")
+    patient_info_parts.append(f"Date: {prescription['date']}")
     
-    patient_table = Table(patient_data, colWidths=[2*inch, 4*inch])
-    patient_table.setStyle(TableStyle([
-        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-        ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 0), (-1, -1), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-    ]))
-    story.append(patient_table)
-    story.append(Spacer(1, 0.3*inch))
+    patient_info_line = " | ".join(patient_info_parts)
+    story.append(Paragraph(patient_info_line, styles['Normal']))
+    story.append(Spacer(1, 0.1*inch))
+    
+    # Diagnosis and Investigations
+    if prescription.get('diagnosis'):
+        story.append(Paragraph(f"<b>Diagnosis:</b> {prescription['diagnosis']}", styles['Normal']))
+        story.append(Spacer(1, 0.05*inch))
+    
+    if prescription.get('investigations'):
+        story.append(Paragraph(f"<b>Investigations Advised:</b> {prescription['investigations']}", styles['Normal']))
+        story.append(Spacer(1, 0.2*inch))
     
     # Medicines
     story.append(Paragraph("<b>Rx</b>", section_header_style))
