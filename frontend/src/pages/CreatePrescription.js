@@ -152,7 +152,7 @@ const CreatePrescription = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.patient_name || medicines.some(m => !m.name || !m.dosage || !m.frequency)) {
+    if (!formData.patient_name || medicines.some(m => !m.name || !m.frequency)) {
       toast.error("Please fill all required fields");
       return;
     }
