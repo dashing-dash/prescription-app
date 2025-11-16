@@ -490,7 +490,7 @@ async def download_prescription_pdf(prescription_id: str, inline: bool = True, t
     story.append(Spacer(1, 0.3*inch))
     
     # Footer
-    story.append(Paragraph("निवास : 7, शास्त्रीनगर, अजमेर-305001 | 0145-2427465", footer_style))
+    story.append(Paragraph("पता : 7, शास्त्रीनगर, अजमेर-305001 | 0145-2427465", footer_style))
     
     doc.build(story)
     buffer.seek(0)
