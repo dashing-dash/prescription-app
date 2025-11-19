@@ -475,8 +475,9 @@ const CreatePrescription = () => {
                           data-testid={`medicine-suggestion-${med.id}`}
                         >
                           <div className="font-medium text-gray-900">{med.name}</div>
-                          <div className="text-sm text-gray-600 mt-1">
-                            <span className="font-medium">Dosage:</span> {med.dosage} | <span className="font-medium">Frequency:</span> {med.frequency}
+                          <div className="text-sm text-gray-600 mt-1 flex gap-4">
+                            {med.dosage && <span><span className="font-medium">Dosage:</span> {med.dosage}</span>}
+                            <span><span className="font-medium">Frequency:</span> {med.frequency}</span>
                           </div>
                         </div>
                       ))}
