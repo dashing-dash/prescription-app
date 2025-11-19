@@ -318,9 +318,10 @@ async def download_prescription_pdf(prescription_id: str, inline: bool = True, t
     if not prescription:
         raise HTTPException(status_code=404, detail="Prescription not found")
     
-    # Create PDF
+    # Create PDF with extra margins for pre-printed letterhead
     buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=72, leftMargin=72, topMargin=50, bottomMargin=50)
+    # Increased top and bottom margins to leave space for pre-printed header/footer
+    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=72, leftMargin=72, topMargin=120, bottomMargin=100)
     
     # Register Hindi font - Using Nakula for proper Unicode Devanagari rendering
     try:
