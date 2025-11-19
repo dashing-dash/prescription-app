@@ -388,8 +388,9 @@ const CreatePrescription = () => {
                 <Input
                   id="investigations"
                   type="text"
-                  value={formData.investigations}
-                  onChange={(e) => handleInvestigationChange(e.target.value)}
+                  value={investigationInput}
+                  onChange={(e) => handleInvestigationInputChange(e.target.value)}
+                  onKeyPress={handleInvestigationKeyPress}
                   onFocus={() => {
                     searchInvestigations('');
                     setShowInvestigationSuggestions(true);
@@ -397,7 +398,7 @@ const CreatePrescription = () => {
                   onBlur={() => {
                     setTimeout(() => setShowInvestigationSuggestions(false), 300);
                   }}
-                  placeholder="Type to search or click to see all..."
+                  placeholder="Type investigation name and press Enter, or select from list..."
                   className="mt-1.5 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                   data-testid="investigations-input"
                 />
@@ -405,7 +406,7 @@ const CreatePrescription = () => {
                 {showInvestigationSuggestions && investigationSuggestions.length > 0 && (
                   <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto" data-testid="investigation-suggestions">
                     <div className="p-2 border-b border-gray-200 bg-gray-50">
-                      <p className="text-xs text-gray-600 font-medium">Select investigations:</p>
+                      <p className="text-xs text-gray-600 font-medium">Click to select (can select multiple):</p>
                     </div>
                     {investigationSuggestions.map((investigation) => {
                       const isSelected = selectedInvestigations.some(inv => inv.id === investigation.id);
@@ -439,7 +440,7 @@ const CreatePrescription = () => {
                         {inv.name}
                         <button
                           type="button"
-                          onClick={() => toggleInvestigation(inv)}
+                          onClick={() => removeInvestigation(inv)}
                           className="hover:text-blue-900"
                         >
                           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
