@@ -45,7 +45,6 @@ const ViewPrescription = () => {
           }, 500);
         };
       }
-      toast.success("Opening print dialog");
     } catch (error) {
       toast.error("Failed to open prescription");
     }
