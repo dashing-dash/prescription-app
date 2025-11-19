@@ -402,20 +402,7 @@ async def download_prescription_pdf(prescription_id: str, inline: bool = True, t
         story.append(Paragraph(prescription['doctor_notes'], styles['Normal']))
         story.append(Spacer(1, 0.3*inch))
     
-    # Signature
-    story.append(Spacer(1, 0.5*inch))
-    signature_style = ParagraphStyle(
-        'Signature',
-        parent=styles['Normal'],
-        fontSize=10,
-        alignment=TA_LEFT,
-        fontName=hindi_font
-    )
-    story.append(Paragraph("<b>डॉ. संजिव माहेश्वरी</b>", signature_style))
-    story.append(Spacer(1, 0.3*inch))
-    
-    # Footer
-    story.append(Paragraph("पता : 7, शास्त्रीनगर, अजमेर-305001 | 0145-2427465", footer_style))
+    # NO FOOTER OR SIGNATURE - Will be on pre-printed letterhead
     
     doc.build(story)
     buffer.seek(0)
