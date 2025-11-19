@@ -86,13 +86,60 @@ const CreatePrescription = () => {
     }
   };
 
-  const handleInvestigationChange = (value) => {
-    setFormData({ ...formData, investigations: value });
+  const handleInvestigationInputChange = (value) => {
+    setInvestigationInput(value);
     if (value) {
       searchInvestigations(value);
       setShowInvestigationSuggestions(true);
     } else {
       setShowInvestigationSuggestions(false);
+    }
+  };
+
+  const addCustomInvestigation = async () => {
+    if (!investigationInput.trim()) return;
+    
+    const investigationName = investigationInput.trim();
+    
+    // Check if already selected
+    if (selectedInvestigations.some(inv => inv.name.toLowerCase() === investigationName.toLowerCase())) {
+      setInvestigationInput('');
+      return;
+    }
+    
+    // Save to backend first
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${API}/investigations/save`, 
+        { name: investigationName },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      // Add to selected list
+      const newInvestigation = { 
+        id: Date.now().toString(), 
+        name: investigationName 
+      };
+      const updated = [...selectedInvestigations, newInvestigation];
+      setSelectedInvestigations(updated);
+      
+      // Update form data
+      const investigationText = updated.map(inv => inv.name).join(', ');
+      setFormData({ ...formData, investigations: investigationText });
+      
+      // Clear input
+      setInvestigationInput('');
+      setShowInvestigationSuggestions(false);
+      
+    } catch (error) {
+      console.error("Failed to save investigation", error);
+    }
+  };
+
+  const handleInvestigationKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addCustomInvestigation();
     }
   };
 
@@ -107,6 +154,17 @@ const CreatePrescription = () => {
     setSelectedInvestigations(updated);
     
     // Update form data with comma-separated list
+    const investigationText = updated.map(inv => inv.name).join(', ');
+    setFormData({ ...formData, investigations: investigationText });
+    
+    // Clear input after selection
+    setInvestigationInput('');
+  };
+
+  const removeInvestigation = (investigation) => {
+    const updated = selectedInvestigations.filter(inv => inv.id !== investigation.id);
+    setSelectedInvestigations(updated);
+    
     const investigationText = updated.map(inv => inv.name).join(', ');
     setFormData({ ...formData, investigations: investigationText });
   };
