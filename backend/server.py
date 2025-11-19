@@ -336,46 +336,6 @@ async def download_prescription_pdf(prescription_id: str, inline: bool = True, t
     styles = getSampleStyleSheet()
     
     # Custom styles
-    header_style = ParagraphStyle(
-        'CustomHeader',
-        parent=styles['Heading1'],
-        fontSize=12,
-        textColor=colors.HexColor('#1e40af'),
-        alignment=TA_LEFT,
-        spaceAfter=3,
-        fontName=hindi_font
-    )
-    
-    header_style_right = ParagraphStyle(
-        'CustomHeaderRight',
-        parent=styles['Heading1'],
-        fontSize=12,
-        textColor=colors.HexColor('#1e40af'),
-        alignment=TA_LEFT,
-        spaceAfter=3,
-        fontName=hindi_font
-    )
-    
-    center_header_style = ParagraphStyle(
-        'CenterHeader',
-        parent=styles['Normal'],
-        fontSize=11,
-        textColor=colors.HexColor('#1e40af'),
-        alignment=TA_CENTER,
-        spaceAfter=12,
-        fontName=hindi_font
-    )
-    
-    subheader_style = ParagraphStyle(
-        'CustomSubHeader',
-        parent=styles['Normal'],
-        fontSize=9,
-        textColor=colors.HexColor('#64748b'),
-        alignment=TA_LEFT,
-        spaceAfter=2,
-        fontName=hindi_font
-    )
-    
     section_header_style = ParagraphStyle(
         'SectionHeader',
         parent=styles['Heading2'],
@@ -385,44 +345,8 @@ async def download_prescription_pdf(prescription_id: str, inline: bool = True, t
         spaceBefore=10
     )
     
-    footer_style = ParagraphStyle(
-        'Footer',
-        parent=styles['Normal'],
-        fontSize=9,
-        textColor=colors.HexColor('#64748b'),
-        alignment=TA_CENTER,
-        fontName=hindi_font
-    )
-    
-    # Header with two columns
-    header_left = [
-        [Paragraph("डॉ. संजिव माहेश्वरी", header_style)],
-        [Paragraph("एम. डी. (मेडीसिन)", subheader_style)],
-        [Paragraph("F.I.C.P., F.I.A.C.M., F.F.I.S.C., F.I.M.S.A., F.I.C.A.", subheader_style)],
-        [Paragraph("वरिष्ठ आचार्य (मेडीसिन)", subheader_style)]
-    ]
-    
-    header_right = [
-        [Paragraph("डॉ. (श्रीमती) रेखा माहेश्वरी", header_style_right)],
-        [Paragraph("एम. एस. (सर्जरी)", subheader_style)],
-        [Paragraph("वरिष्ठ आचार्या (सर्जरी)", subheader_style)]
-    ]
-    
-    # Create header table
-    header_data = [
-        [Table(header_left, colWidths=[3*inch]), Table(header_right, colWidths=[3*inch])]
-    ]
-    header_table = Table(header_data, colWidths=[3*inch, 3*inch])
-    header_table.setStyle(TableStyle([
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('ALIGN', (0, 0), (0, 0), 'LEFT'),
-        ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
-    ]))
-    story.append(header_table)
-    
-    # Center header
-    story.append(Paragraph("ज. ला. ने. मेडिकल कॉलेज एवं चिकित्सालय, अजमेर", center_header_style))
-    story.append(Spacer(1, 0.1*inch))
+    # NO HEADER - Will be on pre-printed letterhead
+    # Start directly with prescription content
     
     # Patient Info
     story.append(Paragraph("<b>Prescription</b>", section_header_style))
