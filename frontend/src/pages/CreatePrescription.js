@@ -91,12 +91,27 @@ const CreatePrescription = () => {
       searchInvestigations(value);
       setShowInvestigationSuggestions(true);
     } else {
-      setInvestigationSuggestions([]);
       setShowInvestigationSuggestions(false);
     }
   };
 
+  const toggleInvestigation = (investigation) => {
+    const isSelected = selectedInvestigations.some(inv => inv.id === investigation.id);
+    let updated;
+    if (isSelected) {
+      updated = selectedInvestigations.filter(inv => inv.id !== investigation.id);
+    } else {
+      updated = [...selectedInvestigations, investigation];
+    }
+    setSelectedInvestigations(updated);
+    
+    // Update form data with comma-separated list
+    const investigationText = updated.map(inv => inv.name).join(', ');
+    setFormData({ ...formData, investigations: investigationText });
+  };
+
   const selectInvestigation = (investigation) => {
+    // Deprecated - keeping for compatibility
     setFormData({ ...formData, investigations: investigation.name });
     setInvestigationSuggestions([]);
     setShowInvestigationSuggestions(false);
