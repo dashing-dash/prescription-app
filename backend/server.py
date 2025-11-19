@@ -193,6 +193,28 @@ async def search_investigations(q: str = "", _: str = Depends(get_current_user))
         ).limit(50).to_list(50)
     return investigations
 
+class InvestigationCreate(BaseModel):
+    name: str
+
+@api_router.post("/investigations/save")
+async def save_investigation(investigation: InvestigationCreate, _: str = Depends(get_current_user)):
+    """Save a new investigation if it doesn't exist"""
+    investigation_key = investigation.name.lower().strip()
+    
+    # Check if this investigation already exists
+    existing = await db.investigations.find_one({"unique_key": investigation_key})
+    if existing:
+        return {"message": "Investigation already exists", "id": existing["id"]}
+    
+    # Save new investigation
+    investigation_doc = {
+        "id": str(uuid.uuid4()),
+        "name": investigation.name.strip(),
+        "unique_key": investigation_key
+    }
+    await db.investigations.insert_one(investigation_doc)
+    return {"message": "Investigation saved", "id": investigation_doc["id"]}
+
 @api_router.post("/medicines/save")
 async def save_medicine(medicine: PrescriptionMedicine, _: str = Depends(get_current_user)):
     """Save a new medicine combination if it doesn't exist"""
