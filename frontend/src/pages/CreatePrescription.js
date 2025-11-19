@@ -30,6 +30,7 @@ const CreatePrescription = () => {
   const [showPatientSuggestions, setShowPatientSuggestions] = useState(false);
   const [investigationSuggestions, setInvestigationSuggestions] = useState([]);
   const [showInvestigationSuggestions, setShowInvestigationSuggestions] = useState(false);
+  const [selectedInvestigations, setSelectedInvestigations] = useState([]);
 
   useEffect(() => {
     if (medicineSearch && activeSearchIndex !== null) {
