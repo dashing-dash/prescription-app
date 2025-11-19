@@ -153,8 +153,8 @@ const CreatePrescription = () => {
     }
     setSelectedInvestigations(updated);
     
-    // Update form data with comma-separated list
-    const investigationText = updated.map(inv => inv.name).join(', ');
+    // Update form data with period-separated list
+    const investigationText = updated.map(inv => inv.name).join('. ');
     setFormData({ ...formData, investigations: investigationText });
     
     // Clear input after selection
@@ -165,7 +165,8 @@ const CreatePrescription = () => {
     const updated = selectedInvestigations.filter(inv => inv.id !== investigation.id);
     setSelectedInvestigations(updated);
     
-    const investigationText = updated.map(inv => inv.name).join(', ');
+    // Update form data with period-separated list
+    const investigationText = updated.map(inv => inv.name).join('. ');
     setFormData({ ...formData, investigations: investigationText });
   };
 
