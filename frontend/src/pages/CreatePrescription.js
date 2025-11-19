@@ -123,8 +123,8 @@ const CreatePrescription = () => {
       const updated = [...selectedInvestigations, newInvestigation];
       setSelectedInvestigations(updated);
       
-      // Update form data
-      const investigationText = updated.map(inv => inv.name).join(', ');
+      // Update form data with period-separated list
+      const investigationText = updated.map(inv => inv.name).join('. ');
       setFormData({ ...formData, investigations: investigationText });
       
       // Clear input
