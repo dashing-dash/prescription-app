@@ -31,6 +31,7 @@ const CreatePrescription = () => {
   const [investigationSuggestions, setInvestigationSuggestions] = useState([]);
   const [showInvestigationSuggestions, setShowInvestigationSuggestions] = useState(false);
   const [selectedInvestigations, setSelectedInvestigations] = useState([]);
+  const [investigationInput, setInvestigationInput] = useState('');
 
   useEffect(() => {
     if (medicineSearch && activeSearchIndex !== null) {
