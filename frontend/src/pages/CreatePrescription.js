@@ -332,30 +332,62 @@ const CreatePrescription = () => {
                   value={formData.investigations}
                   onChange={(e) => handleInvestigationChange(e.target.value)}
                   onFocus={() => {
-                    if (formData.investigations) {
-                      searchInvestigations(formData.investigations);
-                      setShowInvestigationSuggestions(true);
-                    }
+                    searchInvestigations('');
+                    setShowInvestigationSuggestions(true);
                   }}
                   onBlur={() => {
-                    setTimeout(() => setShowInvestigationSuggestions(false), 200);
+                    setTimeout(() => setShowInvestigationSuggestions(false), 300);
                   }}
-                  placeholder="e.g., Complete Blood Count, X-ray Chest"
+                  placeholder="Type to search or click to see all..."
                   className="mt-1.5 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                   data-testid="investigations-input"
                 />
-                {/* Investigation autocomplete dropdown */}
+                {/* Investigation multi-select dropdown */}
                 {showInvestigationSuggestions && investigationSuggestions.length > 0 && (
-                  <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto" data-testid="investigation-suggestions">
-                    {investigationSuggestions.map((investigation) => (
-                      <div
-                        key={investigation.id}
-                        onClick={() => selectInvestigation(investigation)}
-                        className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                        data-testid={`investigation-suggestion-${investigation.id}`}
+                  <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto" data-testid="investigation-suggestions">
+                    <div className="p-2 border-b border-gray-200 bg-gray-50">
+                      <p className="text-xs text-gray-600 font-medium">Select investigations:</p>
+                    </div>
+                    {investigationSuggestions.map((investigation) => {
+                      const isSelected = selectedInvestigations.some(inv => inv.id === investigation.id);
+                      return (
+                        <div
+                          key={investigation.id}
+                          onClick={() => toggleInvestigation(investigation)}
+                          className={`px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 flex items-center gap-3 ${isSelected ? 'bg-blue-50' : ''}`}
+                          data-testid={`investigation-suggestion-${investigation.id}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => {}}
+                            className="w-4 h-4 text-blue-600 rounded"
+                          />
+                          <div className="font-medium text-gray-900">{investigation.name}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {/* Show selected investigations as chips */}
+                {selectedInvestigations.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {selectedInvestigations.map((inv) => (
+                      <span
+                        key={inv.id}
+                        className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm"
                       >
-                        <div className="font-medium text-gray-900">{investigation.name}</div>
-                      </div>
+                        {inv.name}
+                        <button
+                          type="button"
+                          onClick={() => toggleInvestigation(inv)}
+                          className="hover:text-blue-900"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </span>
                     ))}
                   </div>
                 )}
