@@ -130,7 +130,7 @@ const CreatePrescription = () => {
   const selectMedicine = (index, medicine) => {
     const updatedMedicines = [...medicines];
     updatedMedicines[index].name = medicine.name;
-    updatedMedicines[index].dosage = medicine.dosage;
+    updatedMedicines[index].dosage = medicine.dosage || '';
     updatedMedicines[index].frequency = medicine.frequency;
     setMedicines(updatedMedicines);
     setMedicineSuggestions([]);
