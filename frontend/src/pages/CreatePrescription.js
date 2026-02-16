@@ -32,6 +32,7 @@ const CreatePrescription = () => {
   const [showInvestigationSuggestions, setShowInvestigationSuggestions] = useState(false);
   const [selectedInvestigations, setSelectedInvestigations] = useState([]);
   const [investigationInput, setInvestigationInput] = useState('');
+  const [showDiagnosisInvestigationSuggestions, setShowDiagnosisInvestigationSuggestions] = useState(false);
 
   useEffect(() => {
     if (medicineSearch && activeSearchIndex !== null) {
@@ -74,6 +75,32 @@ const CreatePrescription = () => {
     setShowPatientSuggestions(false);
   };
 
+  const searchDiagnosisInvestigations = async (query) => {
+    if (!query) {
+      setShowDiagnosisInvestigationSuggestions(false);
+      return;
+    }
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/diagnosis-investigations/search?q=${query}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setInvestigationSuggestions(response.data);
+      setShowDiagnosisInvestigationSuggestions(true);
+    } catch (error) {
+      console.error("Failed to search diagnosis/investigations", error);
+    }
+  };
+
+  const selectDiagnosisInvestigation = (item) => {
+    setFormData({
+      ...formData,
+      diagnosis: item.diagnosis,
+      investigations: item.investigations
+    });
+    setShowDiagnosisInvestigationSuggestions(false);
+  };
+
   const searchInvestigations = async (query) => {
     try {
       const token = localStorage.getItem('token');
@@ -87,13 +114,13 @@ const CreatePrescription = () => {
   };
 
   const handleInvestigationInputChange = (value) => {
-    setInvestigationInput(value);
-    if (value) {
-      searchInvestigations(value);
-      setShowInvestigationSuggestions(true);
-    } else {
-      setShowInvestigationSuggestions(false);
-    }
+    setFormData({ ...formData, investigations: value });
+    searchDiagnosisInvestigations(value);
+  };
+  
+  const handleDiagnosisChange = (value) => {
+    setFormData({ ...formData, diagnosis: value });
+    searchDiagnosisInvestigations(value);
   };
 
   const addCustomInvestigation = async () => {
@@ -371,84 +398,50 @@ const CreatePrescription = () => {
                 />
               </div>
 
-              <div>
-                <Label htmlFor="diagnosis" className="text-gray-700 font-medium">Diagnosis</Label>
-                <Input
-                  id="diagnosis"
-                  type="text"
-                  value={formData.diagnosis}
-                  onChange={(e) => setFormData({ ...formData, diagnosis: e.target.value })}
-                  placeholder="e.g., Upper Respiratory Tract Infection"
-                  className="mt-1.5 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                  data-testid="diagnosis-input"
-                />
-              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative">
+                <div>
+                  <Label htmlFor="diagnosis" className="text-gray-700 font-medium">Diagnosis</Label>
+                  <Input
+                    id="diagnosis"
+                    type="text"
+                    value={formData.diagnosis}
+                    onChange={(e) => handleDiagnosisChange(e.target.value)}
+                    onBlur={() => {
+                      setTimeout(() => setShowDiagnosisInvestigationSuggestions(false), 200);
+                    }}
+                    placeholder="e.g., Upper Respiratory Tract Infection"
+                    className="mt-1.5 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                    data-testid="diagnosis-input"
+                  />
+                </div>
 
-              <div className="relative">
-                <Label htmlFor="investigations" className="text-gray-700 font-medium">Investigations Advised</Label>
-                <Input
-                  id="investigations"
-                  type="text"
-                  value={investigationInput}
-                  onChange={(e) => handleInvestigationInputChange(e.target.value)}
-                  onKeyPress={handleInvestigationKeyPress}
-                  onFocus={() => {
-                    searchInvestigations('');
-                    setShowInvestigationSuggestions(true);
-                  }}
-                  onBlur={() => {
-                    setTimeout(() => setShowInvestigationSuggestions(false), 300);
-                  }}
-                  placeholder="Type investigation name and press Enter, or select from list..."
-                  className="mt-1.5 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                  data-testid="investigations-input"
-                />
-                {/* Investigation multi-select dropdown */}
-                {showInvestigationSuggestions && investigationSuggestions.length > 0 && (
-                  <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto" data-testid="investigation-suggestions">
-                    <div className="p-2 border-b border-gray-200 bg-gray-50">
-                      <p className="text-xs text-gray-600 font-medium">Click to select (can select multiple):</p>
-                    </div>
-                    {investigationSuggestions.map((investigation) => {
-                      const isSelected = selectedInvestigations.some(inv => inv.id === investigation.id);
-                      return (
-                        <div
-                          key={investigation.id}
-                          onClick={() => toggleInvestigation(investigation)}
-                          className={`px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 flex items-center gap-3 ${isSelected ? 'bg-blue-50' : ''}`}
-                          data-testid={`investigation-suggestion-${investigation.id}`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => {}}
-                            className="w-4 h-4 text-blue-600 rounded"
-                          />
-                          <div className="font-medium text-gray-900">{investigation.name}</div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-                {/* Show selected investigations as chips */}
-                {selectedInvestigations.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {selectedInvestigations.map((inv) => (
-                      <span
-                        key={inv.id}
-                        className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm"
+                <div>
+                  <Label htmlFor="investigations" className="text-gray-700 font-medium">Investigations Advised</Label>
+                  <Input
+                    id="investigations"
+                    type="text"
+                    value={formData.investigations}
+                    onChange={(e) => handleInvestigationInputChange(e.target.value)}
+                    onBlur={() => {
+                      setTimeout(() => setShowDiagnosisInvestigationSuggestions(false), 200);
+                    }}
+                    placeholder="e.g., CBC, X-Ray Chest"
+                    className="mt-1.5 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                    data-testid="investigations-input"
+                  />
+                </div>
+
+                {showDiagnosisInvestigationSuggestions && investigationSuggestions.length > 0 && (
+                  <div className="absolute z-20 w-full mt-16 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto" data-testid="diagnosis-investigation-suggestions">
+                    {investigationSuggestions.map((item) => (
+                      <div
+                        key={item.id}
+                        onClick={() => selectDiagnosisInvestigation(item)}
+                        className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0"
                       >
-                        {inv.name}
-                        <button
-                          type="button"
-                          onClick={() => removeInvestigation(inv)}
-                          className="hover:text-blue-900"
-                        >
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </span>
+                        <div className="font-medium text-gray-900">{item.diagnosis}</div>
+                        <div className="text-sm text-gray-600 mt-1">{item.investigations}</div>
+                      </div>
                     ))}
                   </div>
                 )}
