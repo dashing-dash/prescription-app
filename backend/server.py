@@ -27,9 +27,32 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 # MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+env = os.environ.get('ENV', 'local') # Default to 'local' if not set
+
+if env == 'prod':
+    from pymongo.mongo_client import MongoClient
+    from pymongo.server_api import ServerApi
+    import certifi
+
+    # MongoDB Atlas connection
+    uri = os.environ['MONGO_ATLAS_URI']
+    ca_file = certifi.where()
+    client_sync = MongoClient(uri, server_api=ServerApi('1'), tlsCAFile=ca_file)
+    try:
+        client_sync.admin.command('ping')
+        print("Pinged your deployment. You successfully connected to MongoDB Atlas!")
+    except Exception as e:
+        print(e)
+    
+    # For FastAPI and Motor, we still need AsyncIOMotorClient.
+    # We will use the same URI for Motor, assuming it's an Atlas connection string.
+    client = AsyncIOMotorClient(uri, tlsCAFile=ca_file)
+    db = client[os.environ['DB_NAME']]
+    
+else: # local environment
+    mongo_url = os.environ['MONGO_URL']
+    client = AsyncIOMotorClient(mongo_url)
+    db = client[os.environ['DB_NAME']]
 
 # Security
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
