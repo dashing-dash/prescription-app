@@ -27,9 +27,32 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 # MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+env = os.environ.get('ENV', 'local') # Default to 'local' if not set
+
+if env == 'prod':
+    from pymongo.mongo_client import MongoClient
+    from pymongo.server_api import ServerApi
+    import certifi
+
+    # MongoDB Atlas connection
+    uri = os.environ['MONGO_ATLAS_URI']
+    ca_file = certifi.where()
+    client_sync = MongoClient(uri, server_api=ServerApi('1'), tlsCAFile=ca_file)
+    try:
+        client_sync.admin.command('ping')
+        print("Pinged your deployment. You successfully connected to MongoDB Atlas!")
+    except Exception as e:
+        print(e)
+    
+    # For FastAPI and Motor, we still need AsyncIOMotorClient.
+    # We will use the same URI for Motor, assuming it's an Atlas connection string.
+    client = AsyncIOMotorClient(uri, tlsCAFile=ca_file)
+    db = client[os.environ['DB_NAME']]
+    
+else: # local environment
+    mongo_url = os.environ['MONGO_URL']
+    client = AsyncIOMotorClient(mongo_url)
+    db = client[os.environ['DB_NAME']]
 
 # Security
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -84,6 +107,13 @@ class Prescription(BaseModel):
     doctor_notes: Optional[str] = None
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
+class DiagnosisInvestigation(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    diagnosis: str
+    investigations: str
+    unique_key: str
+
 class PrescriptionCreate(BaseModel):
     patient_name: str
     patient_age: Optional[int] = None
@@ -120,6 +150,10 @@ def create_medicine_key(name: str, dosage: str, frequency: str) -> str:
     """Create unique key for medicine combination"""
     return f"{name.lower().strip()}_{dosage.lower().strip()}_{frequency.lower().strip()}"
 
+def create_diagnosis_investigation_key(diagnosis: str, investigations: str) -> str:
+    """Create unique key for diagnosis and investigation combination"""
+    return f"{diagnosis.lower().strip()}_{investigations.lower().strip()}"
+
 # Initialize database with doctor
 async def init_db():
     # Create doctor if not exists
@@ -135,7 +169,7 @@ async def init_db():
         await db.users.insert_one(doctor_data)
     
     # Clear pre-seeded medicines
-    await db.medicines.delete_many({})
+    # await db.medicines.delete_many({})
 
 @app.on_event("startup")
 async def startup_event():
@@ -193,8 +227,28 @@ async def search_investigations(q: str = "", _: str = Depends(get_current_user))
         ).limit(50).to_list(50)
     return investigations
 
+@api_router.get("/diagnosis-investigations/search")
+async def search_diagnosis_investigations(q: str = "", _: str = Depends(get_current_user)):
+    if not q:
+        results = await db.diagnosis_investigations.find({}, {"_id": 0}).limit(50).to_list(50)
+    else:
+        results = await db.diagnosis_investigations.find(
+            {
+                "$or": [
+                    {"diagnosis": {"$regex": q, "$options": "i"}},
+                    {"investigations": {"$regex": q, "$options": "i"}}
+                ]
+            },
+            {"_id": 0}
+        ).limit(50).to_list(50)
+    return results
+
 class InvestigationCreate(BaseModel):
     name: str
+
+class DiagnosisInvestigationCreate(BaseModel):
+    diagnosis: str
+    investigations: str
 
 @api_router.post("/investigations/save")
 async def save_investigation(investigation: InvestigationCreate, _: str = Depends(get_current_user)):
@@ -214,6 +268,24 @@ async def save_investigation(investigation: InvestigationCreate, _: str = Depend
     }
     await db.investigations.insert_one(investigation_doc)
     return {"message": "Investigation saved", "id": investigation_doc["id"]}
+
+@api_router.post("/diagnosis-investigations/save")
+async def save_diagnosis_investigation(item: DiagnosisInvestigationCreate, _: str = Depends(get_current_user)):
+    """Save a new diagnosis and investigation combination if it doesn't exist"""
+    unique_key = create_diagnosis_investigation_key(item.diagnosis, item.investigations)
+    
+    existing = await db.diagnosis_investigations.find_one({"unique_key": unique_key})
+    if existing:
+        return {"message": "Diagnosis/Investigation combination already exists", "id": existing["id"]}
+    
+    doc = {
+        "id": str(uuid.uuid4()),
+        "diagnosis": item.diagnosis,
+        "investigations": item.investigations,
+        "unique_key": unique_key
+    }
+    await db.diagnosis_investigations.insert_one(doc)
+    return {"message": "Diagnosis/Investigation combination saved", "id": doc["id"]}
 
 @api_router.post("/medicines/save")
 async def save_medicine(medicine: PrescriptionMedicine, _: str = Depends(get_current_user)):
@@ -254,6 +326,19 @@ async def create_prescription(prescription: PrescriptionCreate, _: str = Depends
         }
         await db.patients.insert_one(patient_doc)
     
+    # Auto-save diagnosis and investigation if provided
+    if prescription.diagnosis and prescription.diagnosis.strip() and prescription.investigations and prescription.investigations.strip():
+        unique_key = create_diagnosis_investigation_key(prescription.diagnosis, prescription.investigations)
+        existing_di = await db.diagnosis_investigations.find_one({"unique_key": unique_key})
+        if not existing_di:
+            di_doc = {
+                "id": str(uuid.uuid4()),
+                "diagnosis": prescription.diagnosis,
+                "investigations": prescription.investigations,
+                "unique_key": unique_key
+            }
+            await db.diagnosis_investigations.insert_one(di_doc)
+
     # Auto-save investigation if provided
     if prescription.investigations and prescription.investigations.strip():
         investigation_key = prescription.investigations.lower().strip()
