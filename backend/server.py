@@ -18,7 +18,7 @@ from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.units import inch
-from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 import io
@@ -425,10 +425,9 @@ async def download_prescription_pdf(prescription_id: str, inline: bool = True, t
     if not prescription:
         raise HTTPException(status_code=404, detail="Prescription not found")
     
-    # Create PDF with extra margins for pre-printed letterhead
+    # Create PDF
     buffer = io.BytesIO()
-    # Increased top and bottom margins to leave space for pre-printed header/footer
-    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=72, leftMargin=72, topMargin=120, bottomMargin=100)
+    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=72, leftMargin=72, topMargin=50, bottomMargin=50)
     
     # Register Hindi font - Using Nakula for proper Unicode Devanagari rendering
     try:
@@ -452,8 +451,46 @@ async def download_prescription_pdf(prescription_id: str, inline: bool = True, t
         spaceBefore=10
     )
     
-    # NO HEADER - Will be on pre-printed letterhead
-    # Start directly with prescription content
+    header_style_left = ParagraphStyle(
+        'HeaderLeft',
+        parent=styles['Normal'],
+        fontSize=10,
+        leading=12,
+        alignment=TA_LEFT
+    )
+    
+    header_style_right = ParagraphStyle(
+        'HeaderRight',
+        parent=styles['Normal'],
+        fontSize=10,
+        leading=12,
+        alignment=TA_RIGHT
+    )
+
+    # Doctor Header
+    dr1_text = """<b>Dr. Sanjeev Maheshwari</b><br/>
+    MD(Medicine), JLN Medical College, Ajmer<br/>
+    F.I.C.P, F.I.A.C.M, F.F.I.S.C,<br/>
+    F.I.M.S.A, F.I.C.A"""
+    
+    dr2_text = """<b>Dr. Rekha Maheshwari</b><br/>
+    M.S. Surgery<br/>
+    JLN Medical College, Ajmer"""
+    
+    header_table_data = [[
+        Paragraph(dr1_text, header_style_left),
+        Paragraph(dr2_text, header_style_right)
+    ]]
+    
+    header_table = Table(header_table_data, colWidths=[3.5*inch, 3*inch])
+    header_table.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+        ('LINEBELOW', (0, 0), (-1, -1), 1, colors.black),
+    ]))
+    
+    story.append(header_table)
+    story.append(Spacer(1, 0.2*inch))
     
     # Patient Info
     story.append(Paragraph("<b>Prescription</b>", section_header_style))
