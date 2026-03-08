@@ -467,26 +467,42 @@ async def download_prescription_pdf(prescription_id: str, inline: bool = True, t
         alignment=TA_RIGHT
     )
 
+    header_style_center = ParagraphStyle(
+        'HeaderCenter',
+        parent=styles['Normal'],
+        fontSize=10,
+        leading=12,
+        alignment=TA_CENTER,
+        spaceBefore=5
+    )
+
     # Doctor Header
-    dr1_text = """<b>Dr. Sanjeev Maheshwari</b><br/>
-    MD(Medicine), JLN Medical College, Ajmer<br/>
-    F.I.C.P, F.I.A.C.M, F.F.I.S.C,<br/>
-    F.I.M.S.A, F.I.C.A"""
+    dr1_text = """<b>Dr. Sanjiv Maheshwari</b><br/>
+    MD (Medicine)<br/>
+    F.I.C.P, F.I.A.C.M, F.F.I.S.C, F.I.M.S.A, F.I.C.A<br/>
+    Senior Prefessor"""
     
     dr2_text = """<b>Dr. Rekha Maheshwari</b><br/>
     M.S. Surgery<br/>
-    JLN Medical College, Ajmer"""
+    Senior Prefessor"""
     
-    header_table_data = [[
-        Paragraph(dr1_text, header_style_left),
-        Paragraph(dr2_text, header_style_right)
-    ]]
+    header_table_data = [
+        [
+            Paragraph(dr1_text, header_style_left),
+            Paragraph(dr2_text, header_style_right)
+        ],
+        [
+            Paragraph("JLN Medical College, Ajmer", header_style_center),
+            ""
+        ]
+    ]
     
     header_table = Table(header_table_data, colWidths=[3.5*inch, 3*inch])
     header_table.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('SPAN', (0, 1), (1, 1)),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
-        ('LINEBELOW', (0, 0), (-1, -1), 1, colors.black),
+        ('LINEBELOW', (0, 1), (-1, 1), 1, colors.black),
     ]))
     
     story.append(header_table)
